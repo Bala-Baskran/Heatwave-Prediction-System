@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heat Wave Alert</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>Enter City for Weather Alerts</h2>
+    
+    <form id="weatherForm">
+        <input type="text" id="city" name="city" placeholder="Enter city" required>
+        <button type="submit">Check Weather</button>
+    </form>
+    
+    <div id="weatherResult"></div>
+
+    <script>
+        document.getElementById("weatherForm").onsubmit = async function(e) {
+            e.preventDefault();
+            let city = document.getElementById("city").value;
+            let resultDiv = document.getElementById("weatherResult");
+
+            try {
+                let response = await fetch("/get_weather", {
+                    method: "POST",
+                    body: new URLSearchParams({ "city": city }),
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                });
+
+                let result = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p><strong>Temperature:</strong> ${result.temperature}°C</p>
+                        <p><strong>Description:</strong> ${result.description}</p>
+                        <p><strong>${result.alert}</strong></p>`;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;"><strong>Error:</strong> ${result.error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;"><strong>Request failed!</strong> Please try again.</p>`;
+            }
+        };
+    </script>
+</body>
+</html>
